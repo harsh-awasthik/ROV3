@@ -8,12 +8,8 @@ This is the major project of students of ZHCET, AMU under the aegis of MTS AUV Z
 1. **The Vehicle Side:**
    The vehicle side of the program is simple, it does two tasks: generate controls for the thrusters and send feedback data ( camera-feed and generated control values) to be displayed back to BS. It contains the following:
    
-   |  
-   |  
-    ------> Control.py  
-   |  
-    ------> cam_vehicle.py
-   * **Control.py** : This file employs Multithreading in a producer-consumer fashion; here the *GUI* function is the consumer thread and *run*
+
+   * **control.py** : This file employs Multithreading in a producer-consumer fashion; here the *GUI* function is the consumer thread and *run*
                   function as the producer thread. The run function generates the control and pushes their values on the queue. The thread-                    safe queue is then accessed by the GUI function which encodes and transmit the data back to BS using UDP protocol.
 
    
@@ -29,12 +25,10 @@ This is the major project of students of ZHCET, AMU under the aegis of MTS AUV Z
    *  **opencvserver.py**: This is responsible for rendering the camera stream generated and sended by the cam_vehicle.py. Work is needed to integrate this and joystickrender.py into a single file named UIX.py containing all the necessary data and feeds. 
 
 
-## USB forwarding(USB IP)
-
-1. First Connect Both the RPi and the Controller to your system.
+# Getting Started
 
 
-### On the server side(linux):
+## On the server side(linux):
 
 1. ```sudo apt-get install linux-tools-generic``` 
 
@@ -43,42 +37,42 @@ This is the major project of students of ZHCET, AMU under the aegis of MTS AUV Z
 3. ```sudo nano /etc/modules```
 
 4. add ```usbip_host``` to the end of texts
-5. sudo ufw allow "Port for joystick"
-6. sudo ufw allow "Port for video"
+5. ```sudo ufw allow 7777``` Allowing Firewall for Joystick
+6. ```sudo ufw allow 6666``` Allowing Firewall for OpenCV server
 
-   
-#### End of first time Commands {Commands 5-8 has to be run everytime}.
+7. ```lsusb``` to see a list of attached USB devices
 
-5. ```lsusb``` to see a list of attached USB devices
+8. ```sudo usbip list -p -l``` Check the busid of the Controller
 
-6. ```sudo usbip list -p -l``` Check the busid of the Controller
+9. ```sudo usbip bind --busid="Bus ID"``` enter busid of the controller
 
-7. ```sudo usbip bind --busid="Bus ID"``` enter busid of the controller
+10. ```sudo usbipd``` to start Daemon.
+    #### Commands 7-10 has to be run everytime.
 
-8. ```sudo usbipd``` to start session.
+## On the client side(rpi):
+### Make sure that the Raspberry PI is on bullseye version.
+1. Make sure that the date and time on Pi is correct. If not change with ```sudo date -s "YYYY-MM-DD HH:MM:SS"```
 
-### On the client side(rpi):
-#### Make sure that the raspberry pi is on 1.8.0 version.
-1. On RaspberryPi before using Pip first do 
+2. ```sudo apt update``` 
+
+3. On RaspberryPi before using Pip first do 
   ```sudo rm /usr/lib/python3.11/EXTERNALLY-MANAGED```
+  if nothing is deleted then ignore this line.
 
-2. ```wget http://raspbian.mirror.net.in/raspbian/raspbian/pool/main/l/linux/usbip_2.0+5.10.158-2+rpi1_armhf.deb```  or ```sudo apt-get install linux-tools-generic hwdata ```
-   
-
-3. ```make the folder executable using chmod +x Folder Name```
-
-4. ```sudo apt install ./usbip_2.0+5.10.158-2+rpi1_armhf.deb```
+4. ```sudo apt install usbip```
 
 5. ```sudo modprobe vhci-hcd```
 
 6. ```sudo nano /etc/modules```
 
 7. add ```vhci-hcd``` to the end of texts
+8. Install OpenCV in PI.
 
-#### #### End of first time Commands {Commands 5-8 has to be run everytime}.
+9. ```sudo usbip attach -r "IP Address" -b "Bus ID"```
 
-1. ```sudo usbip attach -r "IP Address" -b "Bus ID"```
-
-2. Run ```sudo pigpiod``` on Terminal.
+10. Run ```sudo pigpiod``` on Terminal.
    
-3. Run Your main python file.
+11. ```python3 control.py```
+12. ```python3 cam_vehicle.py```
+    
+    #### Commands 1, 9-12 has to be run everytime
