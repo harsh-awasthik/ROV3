@@ -1,78 +1,148 @@
-# Remotely Operated Underwater Vehicle
-![9401e3b7-abda-4b59-9359-4a82c22e7b2f](https://github.com/MohammadAmmargk8497/ROV1.0/assets/75717701/faa7e680-f711-4787-b866-4df94a74adfb)
-This is the major project of students of ZHCET, AMU under the aegis of MTS AUV ZHCET Club. This repository is an effort to design the first generation of software for Remotely Operated Underwater Vehicle. The software system can be broken down into two major parts; 1). The Vehicle Side and 2). The Base Station Side.
+# Underwater Remotely Operated Vehicle (ROV) - CS Team Report
+
+**Author:** Harsh Awasthi   
+**Team Members:** Harsh Awasthi, Ammar Bari, Zara, Bilal
+
+---
+![Image of ROV Here](https://geospatialmedia.s3.amazonaws.com/wp-content/uploads/2017/12/HERE1.png)
+
+## Abstract
+This report details the software contributions of the Computer Science team of AMU(ZHCET) to the underwater Remotely Operated Vehicle (ROV). The CS component is essential for controlling the ROV remotely, processing real-time video feeds, handling sensor data, and enabling efficient communication between the Raspberry Pi on the ROV and the base station. 
+
+---
+
+## 1. Introduction
+This project aims to develop an underwater Remotely Operated Vehicle (ROV) capable of performing tasks provided to us. 
+
+As part of this project, the Computer Science (CS) team is responsible for designing and implementing the software that controls the ROV’s movement, processes video and sensor data, and ensures seamless communication between the ROV’s Raspberry Pi and the base station. This report documents the CS team's work on the project, providing an overview of system architecture, setup, code structure, and key functionality. Additionally, it discusses the challenges faced during development, testing methodologies, and future improvement possibilities.
+
+---
+
+## 2. System Architecture and Setup
+
+Before proceeding, we have some necessary prerequisites:
+
+### a. Raspberry Pi:
+- A Raspberry Pi 4 or higher is required.
+- The Bullseye 32-bit version is necessary; otherwise, some features may not work as expected.
+- A fresh installation of the operating system is needed.
+- Ensure that sufficient storage and RAM are available on the Raspberry Pi.
+
+### b. Base Station:
+- A proper Linux-based system or a dual-boot setup is required (virtual environments or WSL do not work due to issues with port forwarding).
+- Ubuntu version 20.04 or 22.04 is preferred.
+- Ensure that there are sufficient ports available:
+  - An Ethernet port (if not available, a USB-to-Ethernet adapter can be used).
+  - A USB Type A port for connecting a joystick.
 
 
-<img width="264" alt="Screenshot 2024-04-16 at 7 59 18 PM" src="https://github.com/MohammadAmmargk8497/ROV1.0/assets/75717701/a402932e-34b4-4920-8b0e-1af140b6fd58">
+## 3. Installation and Setup Guide
+Instructions for setting up the software:
+### Raspberry Pi Setup: 
+- Update:  
+    ```sudo apt-get update```
 
-1. **The Vehicle Side:**
-   The vehicle side of the program is simple, it does two tasks: generate controls for the thrusters and send feedback data ( camera-feed and generated control values) to be displayed back to BS. It contains the following:
-   
+- Installing Python on Pi(if not pre-installed):  
+    ```sudo apt install python3```
 
-   * **control.py** : This file employs Multithreading in a producer-consumer fashion; here the *GUI* function is the consumer thread and *run*
-                  function as the producer thread. The run function generates the control and pushes their values on the queue. The thread-                    safe queue is then accessed by the GUI function which encodes and transmit the data back to BS using UDP protocol.
+- Removing External Dependencies from Python. (if there)    
+    ```sudo rm /usr/lib/python3.11/EXTERNALLY-MANAGED```
 
-   
-    ![IMG_1478](https://github.com/MohammadAmmargk8497/ROV1.0/assets/75717701/2c0aec0d-6ce6-47bf-928b-acbea3391c0b)
+- Installing usbip:   
+    ```sudo apt install usbip```
+
+- Enabelling vhci-hcd:  
+    ``` sudo modprobe vhci-hcd```   
+    ```sudo nano /etc/modules```    
+    add ```vhci-hcd``` to the end of text.   
+    *(Virtual Host Controller Interface Host Controller Driver) is a component in Linux systems that enables USB/IP (USB over IP) functionality, allowing USB devices to be shared over a network.*
+
+- **Installing OpenCV in pi:**    
+
+    ```sudo raspi-config```     
+    Interface options >> Legacy Camera >> Enable  
+
+    ```sudo apt install python3-opencv -y```
+
+    *if numpy is giving errors install numpy 1.21*
 
 
-     
-   * **cam_vehicle.py**: This script uses opencv to capture video frames and send them over to the base station using udp protocol.
+### Base Station Setup:
+- Update:  
+    ```sudo apt-get update```
 
-2. **The Base Station Side:**
+- Installing Python on BS (if not pre-installed):  
+    ```sudo apt install python3```
+
+- Installing Generic Liux Tools for USB-forwarding  
+    ```sudo apt-get install linux-tools-generic ```
+
+- Setting Up usbip-Host:    
+    ```sudo modprobe usbip_host```  
+    ```sudo nano /etc/modules```    
+    add ```usbip_host``` to the end of texts
+
+- Disabling Firewall for the Camera Feed and Joystick data from PI
+    ```sudo ufw allow "6666"/udp```     
+    ```sudo ufw allow "7777"/udp```     
+    *Check for any mismatch in the code*
+
+
+## 4. Code Structure and Functionality
+The Repo is divided into two Folders:   
+
+1.  **pi (For Vehicle Side):**   
+    The vehicle side of the program is simple, it does two tasks:   
+    generate controls for the thrusters and send feedback data ( camera-feed and generated control values) to be displayed back to BS. It contains the following  
+a. **control.py** This file employs Multithreading in a producer-consumer fashion; here the *GUI* function is the consumer thread and *run* function as the producer thread. The run function generates the control and pushes their values on the queue. The thread-safe queue is then accessed by the GUI function which encodes and transmit the data back to BS using UDP protocol.
+![Threading](https://github.com/MohammadAmmargk8497/ROV1.0/assets/75717701/2c0aec0d-6ce6-47bf-928b-acbea3391c0b)
+b.  **cam_vehicle.py**: This script uses opencv to capture video frames and send them over to the base station using udp protocol.
+
+2. **bs (The Base Station Side):**
     The Base Station contains two scripts; *joystickrender.py* and *opencvserver.py*.
    * **joystickrender.py**: This is responsible for displaying the realtime PWM values being generated by the control.py. Future work is needed to transform this into a complete interface.
    *  **opencvserver.py**: This is responsible for rendering the camera stream generated and sended by the cam_vehicle.py. Work is needed to integrate this and joystickrender.py into a single file named UIX.py containing all the necessary data and feeds. 
 
+---
 
-# Getting Started
+## 5. Challenges and Solutions
+
+This section summarizes the major challenges encountered and the solutions implemented.
+
+- **Stability on Raspberry Pi**: The Raspberry Pi is a delicate machine that can face software issues like bricked OS or even hardware damage if handled carelessly. For example, frequent reinstallation of the OS may be required if software becomes corrupted. Additionally, if the transistor pins are damaged, it could render the Pi unusable.
+  
+- **Date and Time Reset on Raspberry Pi**: The Pi's date and time often reset after shutdowns. An incorrect date and time can cause issues, such as errors with commands like `sudo apt update`. To avoid this, ensure the date and time are accurately set using:
+    ```bash
+    sudo date -s "YYYY-MM-DD HH:MM:SS"
+    ```
+
+- **Installation of OpenCV on Raspberry Pi**: Installing OpenCV on the Pi can be complex and time-consuming. For full functionality, install the complete version of OpenCV rather than trimmed-down versions that may lack critical features required for image processing. If issues arise during installation, consulting video tutorials or online documentation can be helpful.
+  
+  **Note**: Avoid installing lightweight versions of OpenCV, as they often lack key libraries.
+
+- **Disabling Firewall for Data Transfer**: To enable data transmission between the Raspberry Pi and the Base Station, disable the firewall on the Base Station. If a specific port is occupied by another process, modify the port settings in both the code and relevant commands to establish a connection.
 
 
-## On the server side(linux):
+- **Latency Issues**: We are currently experiencing some latency in the video feed between the Pi and the Base Station. This is under investigation, and we plan to implement solutions to reduce latency in future iterations.
+---
 
-1. ```sudo apt-get install linux-tools-generic``` 
+## 6. Testing and Results
+Description of testing methods and results:
+- We have included a test file named test_thruster.py in the **pi** folder. This file allows for manual input to the thrusters without requiring the controller setup.
+- The controller values sent to and received from the Pi are saved in log files.
+- The output video file ( *.avi* ) will be saved on the base station.
+---
 
-2. ```sudo modprobe usbip_host```
+## 7. Conclusion and Future Work
+The CS team developed essential software for the ROV project, enabling remote control, real-time communication, video processing, and data logging between the Raspberry Pi and base station. Key challenges included Raspberry Pi configuration, date synchronization, OpenCV installation, and managing latency in data transfer.
 
-3. ```sudo nano /etc/modules```
+We implemented a modular codebase, including a test.py file for manual thruster control, log files for tracking controller values, and video output saved to the base station. Future improvements will focus on reducing latency and optimizing video processing, building on this robust foundation for enhanced ROV functionality.
 
-4. add ```usbip_host``` to the end of texts
-5. ```sudo ufw allow 7777``` Allowing Firewall for Joystick
-6. ```sudo ufw allow 6666``` Allowing Firewall for OpenCV server
+---
 
-7. ```lsusb``` to see a list of attached USB devices
+## References
+- We extend our sincere gratitude to [Mohammad Ammar](https://github.com/MohammadAmmargk8497) for his invaluable guidance throughout this project. His expertise greatly contributed to our progress and success.
+- [The previous ROV repository](https://github.com/MohammadAmmargk8497/ROV1.0) by the AMU Team was instrumental in shaping our approach and implementing critical aspects of our code. We deeply appreciate this foundational resource.
 
-8. ```sudo usbip list -p -l``` Check the busid of the Controller
+---
 
-9. ```sudo usbip bind --busid="Bus ID"``` enter busid of the controller
-
-10. ```sudo usbipd``` to start Daemon.
-    #### Commands 7-10 has to be run everytime.
-
-## On the client side(rpi):
-### Make sure that the Raspberry PI is on bullseye version.
-1. Make sure that the date and time on Pi is correct. If not change with ```sudo date -s "YYYY-MM-DD HH:MM:SS"```
-
-2. ```sudo apt update``` 
-
-3. On RaspberryPi before using Pip first do 
-  ```sudo rm /usr/lib/python3.11/EXTERNALLY-MANAGED```
-  if nothing is deleted then ignore this line.
-
-4. ```sudo apt install usbip```
-
-5. ```sudo modprobe vhci-hcd```
-
-6. ```sudo nano /etc/modules```
-
-7. add ```vhci-hcd``` to the end of texts
-8. Install OpenCV in PI.
-
-9. ```sudo usbip attach -r "IP Address" -b "Bus ID"```
-
-10. Run ```sudo pigpiod``` on Terminal.
-   
-11. ```python3 control.py```
-12. ```python3 cam_vehicle.py```
-    
-    #### Commands 1, 9-12 has to be run everytime
