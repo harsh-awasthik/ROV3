@@ -7,8 +7,7 @@ import threading
 import queue
 import socket
 import json
-
-#import logging
+import logging
 from datetime import datetime
 
 
@@ -122,16 +121,17 @@ class Control(Controller):
             return int((np.sign(value) * (27 ** (abs(value)) - 1) / (27 ** (1) - 1)) * 300 + 1500)
 
 #_____________________________________________________________Control-Thread__________________________________________________________________
-"""
+
 # Setup logging to write to a file
 logging.basicConfig(filename='joystick_log.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
 
 def log_instruction(move, turn, depth):
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     log_entry = f"{timestamp} - Move: {move}, Turn: {turn}, Depth: {depth}"
+    #print(log_entry)
     logging.info(log_entry)
 
-"""
+
 
 def run(control): #Main Control Thread
     # t = 0
@@ -158,13 +158,7 @@ def run(control): #Main Control Thread
             control.control_queue.put((move, turn, depth))
             
             # Log the input values with timestamp
-            #log_instruction(move, turn, depth)
-            
-            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            log_entry = f"{timestamp} - Move: {move}, Turn: {turn}, Depth: {depth}"
-            file = open("data.txt", 'a')
-            file.write(log_entry)
-            file.close()
+            log_instruction(move, turn, depth)
 
             if move & turn == 1500:
 
