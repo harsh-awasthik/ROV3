@@ -2,12 +2,19 @@ import json
 from rich.live import Live
 from rich.table import Table
 from joysticksocket import s
+import logging
+from datetime import datetime
+
+logging.basicConfig(filename='joystick_receive_log.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
+
+def log_instruction(move, turn, depth):
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    log_entry = f"{timestamp} - Move: {move}, Turn: {turn}, Depth: {depth}"
+    logging.info(log_entry)
 
 
 def generate_table() -> Table:
-    #print('hi')
     x = s.recvfrom(1000000)
-    #print('hello')
     client_ip = x[1][0]
     data = x[0]
     data_final = json.loads(data.decode())
@@ -22,7 +29,9 @@ def generate_table() -> Table:
     table.add_row("Turn", str(data_final['turn']))
     table.add_row("Depth", str(data_final['depth']))
 
-    return table
+    # Write the data
+    log_instruction(data_final['move'], data_final['turn'], data_final['depth'])
+
 
 
 with Live(generate_table(), refresh_per_second=40) as live:
