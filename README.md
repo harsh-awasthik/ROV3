@@ -143,6 +143,7 @@ We implemented a modular codebase, including a test.py file for manual thruster 
 ## References
 - We extend our sincere gratitude to [Mohammad Ammar](https://github.com/MohammadAmmargk8497) for his invaluable guidance throughout this project. His expertise greatly contributed to our progress and success.
 - [The previous ROV repository](https://github.com/MohammadAmmargk8497/ROV1.0) by the AMU Team was instrumental in shaping our approach and implementing critical aspects of our code. We deeply appreciate this foundational resource.
+- We are also grateful to the AUV Club leads, including Yusuf Hasan, Mohd. Haadi Akhter, and Eizad Handan, for their valuable support and assistance throughout this project.
 
 ---
 
