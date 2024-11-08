@@ -104,6 +104,34 @@ b.  **cam_vehicle.py**: This script uses opencv to capture video frames and send
    *  **opencvserver.py**: This is responsible for rendering the camera stream generated and sended by the cam_vehicle.py. Work is needed to integrate this and joystickrender.py into a single file named UIX.py containing all the necessary data and feeds. 
 
 ---
+## Starting the Code:
+#### on bs:
+- Open 2 terminal windows
+- Check ip address using ```hostname -I``` (make sure that bs not connected to wifi before checking)
+- bind the port    
+     ```sudo usbip bind --busid="1-1"```
+- Start the demon:  
+     ```sudo usbipd```
+
+- If any problem in demon:
+    - Stop the demon
+    - ```sudo usbip unbind --busid="1-1"```
+    - ```sudo usbip bind --busid="1-1"```
+    - ```sudo usbipd```
+
+#### on pi:
+- ```sudo usbip attach -r "IP Address" -b "1-1"``` attach usbip
+- if any problem:
+    - ```sudo usbip detach -r "IP Address" -b "1-1"``` then reattach
+- ```sudo pigpiod``` initialize gpio
+- Navigate to pi:
+    - Run ```Control.py``` or ```Control0.py```
+    - control.py uses sigmoid fxn and other uses linear fxn for turns..
+    - Run ```cam_vehicle.py```
+
+#### On bs:
+- Navigate to bs:   
+    Run ```python3 opencvserver.py```
 
 ## 5. Challenges and Solutions
 
@@ -146,4 +174,5 @@ We implemented a modular codebase, including a test.py file for manual thruster 
 - We are also grateful to the AUV Club leads, including Yusuf Hasan, Mohd. Haadi Akhter, and Eizad Hamdan, for their valuable support and assistance throughout this project.
 
 ---
+
 
