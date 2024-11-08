@@ -7,7 +7,7 @@ import os
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-server_ip = "192.168.0.133"
+server_ip = "169.254.242.160"
 server_port = 6666
 s.bind((server_ip, server_port))
 
@@ -19,8 +19,8 @@ if os.path.exists(f'output{i}.avi'):
 output_file = f'output{i}.avi'  # Output file name
 
 fps = 20.0  # Frames per second
-frame_width = 640  # Width of the frames
-frame_height = 480  # Height of the frames
+frame_width = 1280  # Width of the frames
+frame_height = 720  # Height of the frames
 
 out = cv2.VideoWriter(output_file, fourcc, fps, (frame_width, frame_height))
 
@@ -37,13 +37,13 @@ while True:
     blurred = cv2.GaussianBlur(img, (9, 9), 10.0)
 
     # Perform Unsharp Masking
-    sharpened = cv2.addWeighted(img, 7, blurred, -2, 1) #(img, alpha, blurred, beta, gamma) change alpha and beta to tweak sharpness
+    # sharpened = cv2.addWeighted(img, 7, blurred, -2, 1) #(img, alpha, blurred, beta, gamma) change alpha and beta to tweak sharpness
 
-    cv2.imshow("fitered", sharpened)
+    # cv2.imshow("fitered", sharpened)
     
     cv2.waitKey(33)  # approximately 1000ms / 30fps
 
-    out.write(sharpened)
+    out.write(img)
 
     if cv2.waitKey(5) & 0xFF == ord('q'):
         break
